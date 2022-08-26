@@ -1,0 +1,18 @@
+[
+    {
+        "id": "213506",
+        "title": "LAptop",
+        "price": 50000,
+        "creation_date": "26.08.22 21:35",
+        "description": "Good",
+        "selling_status": "\u041f\u0440\u043e\u0434\u0430\u0435\u0442\u0441\u044f"
+    },
+    {
+        "id": "213516",
+        "title": "Phone",
+        "price": 50000,
+        "creation_date": "26.08.22 21:35",
+        "description": "Supe",
+        "selling_status": "\u041f\u0440\u043e\u0434\u0430\u0435\u0442\u0441\u044f"
+    }
+]
