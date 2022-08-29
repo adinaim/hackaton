@@ -4,6 +4,9 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 
 
+"""
+почему список сбрасывается
+"""
 
 def read_data():
     """
@@ -35,8 +38,8 @@ def create_data():
         json_data.append(data)
         with open(DB, 'w') as f:
             json.dump(json_data, f, indent=4)
-    except ValueError:
-        print('Неправильно введены данные. Проверьте правильность и повторите попытку')
+    except (JSONDecodeError, ValueError):
+        print('Повторите попытку')
         data = {
             'id': id_,
             'title': input('Введите название: '),
@@ -96,7 +99,7 @@ def retrieve_data():
         return obj
 
 
-
+# если товаров нет вообще
 def update_data():
     """
     Updates info about items
@@ -110,7 +113,6 @@ def update_data():
             obj['price'] = int(input('Введите новую цену: ')) or obj['price']
             obj['description'] = input('Введите новое описание: ') or obj['description']
         except (ValueError, JSONDecodeError):
-            print('Введите правильную цену')
             obj['price'] = obj['price']
             obj['description'] = input('Введите новое описание: ') or obj['description']
         finally:
@@ -120,11 +122,11 @@ def update_data():
             for item in python_data:
                 if obj['id'] == id_:
                     update_date = {'update_date': datetime.now().strftime('%d.%m.%y %H:%M')}
-                    item.update(update_date)
-            json.dump(data, file, indent=4)
+                    item.append(update_date)
+                    json.dump(python_data, file, indent=4)
 
 
-
+# если список пуст, почему except не срабатывает
 def delete_data():
     """
     Deletes items from the list by id
@@ -133,11 +135,15 @@ def delete_data():
         print(f'{id_} нет в списке. Проверьте правильность ввода')
         continue
     else:
-        data.remove(obj)
-        print(f'\n{id_} удален из списка\n')
-        with open(DB, 'w') as file:
-            json.dump(data, file, indent=4)
-        return True
+        try:
+            data.remove(obj)
+            print(f'\n{id_} удален из списка\n')
+            with open(DB, 'w') as file:
+                json.dump(data, file, indent=4)
+            return True
+        except JSONDecodeError:
+            print('Список товаров пуст')
+
 
 
 def clear_data():
@@ -151,7 +157,7 @@ def clear_data():
             print('Список товаров пуст')
 
 
-
+# как сделать так, чтобы либо минимальная, либо максимальная цена была
 def sort_by_price():
     with open(DB, 'r') as file:
         python_data = json.load(file)
@@ -173,9 +179,9 @@ def sort_by_price():
 
 
 def sold_or_not():
-    try:
-        with open(DB, 'r') as file:
-            python_data = json.load(file)
+    with open(DB, 'r') as file:
+        python_data = json.load(file)
+        try:
             wanted_status = str(input('Какие товары вы хотите посмотреть: 1 - продается, 2 - продано: ')).strip().lower()
             if wanted_status == '1' or wanted_status =='продается':
                 print(list([item for item in python_data if item['selling_status'] == 'Продается']))
@@ -184,48 +190,43 @@ def sold_or_not():
             else:
                 raise ValueError('Неправильно введены данные. Повторите попытку')
             return True
-    except ValueError:
-        if wanted_status == '1' or wanted_status =='продается':
-            return [item for item in python_data if item['selling_status'] == 'Продается']
-        elif wanted_status == '2' or wanted_status =='продано':
-            return [item for item in python_data if item['selling_status'] == 'Продано']
-        else:
-            raise ValueError
-            return True
+        except ValueError:
+            wanted_status = str(input('Какие товары вы хотите посмотреть: 1 - продается, 2 - продано: ')).strip().lower()
+            if wanted_status == '1' or wanted_status =='продается':
+                return [item for item in python_data if item['selling_status'] == 'Продается']
+            elif wanted_status == '2' or wanted_status =='продано':
+                return [item for item in python_data if item['selling_status'] == 'Продано']
 
-
-
+# почему два раза запрашивает
 def sort_by_status():
-    if not sold_or_not() is None:
+    while not sold_or_not() == None:
         sold_or_not()
+        break
     else:
         print('Товаров, удовлетворяющих параметрам вашего поиска, нет.')
 
 
-
+# почему после выводится непонятный список, почму стирает базу
 def purchase():
-    with open(DB) as file:
+    with open(DB, 'w+') as file:
         python_data = json.load(file)
         for obj in python_data:
             if obj['selling_status'] == 'Продано':
                 raise ValueError('Данный товар уже продан')
-            try:
-                while check_id() == False:
-                    print(f'{id_} нет в списке. Проверьте правильность ввода')
-                    continue
-                else:
-                    obj['selling_status'] = 'Продано'
-                    with open(DB, 'w+') as file:
-                        selling_status = {'selling_status': 'Продано'}
-                        obj.update(selling_status)
+            else:
+                # try:
+                    while check_id() == False:
+                        print(f'{id_} нет в списке. Проверьте правильность ввода')
+                        continue
+                    else:
+                        obj['selling_status'] = 'Продано'
+                        json.dump(obj, file, indent=4)
                         print('Поздравляем с покупкой')
-            except ValueError:
-                while check_id() == False:
-                    print(f'{id_} нет в списке. Проверьте правильность ввода')
-                    continue
-                else:
-                    selling_status = {'selling_status': 'Продано'}
-                    obj.update(selling_status)
-                    with open(DB, 'w+') as file:
-                        json.dump(data, file)
-                        print('Поздравляем с покупкой')
+                # except ValueError:    # что надо здесь прописать на самом деле
+                #     while check_id() == False:
+                #         print(f'{id_} нет в списке. Проверьте правильность ввода')
+                #         continue
+                #     else:
+                #         obj['selling_status'] = 'Продано'
+                #         json.dump(obj, file, indent=4)
+                #         print('Поздравляем с покупкой')
