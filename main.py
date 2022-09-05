@@ -1,4 +1,5 @@
 from crud import (
+    check_id,
     create_data,
     read_data,
     retrieve_data,
@@ -40,7 +41,7 @@ def interface():
                 print(item)
                 print('-' * 140)
         elif operation == '3' or operation == 'retrieve':
-            print(f'\nВаши данные: {retrieve_data()}\n')
+            retrieve_data()
         elif operation == '4' or operation == 'delete':
             delete_data()
         elif operation == '5' or operation == 'clear':
@@ -48,9 +49,9 @@ def interface():
         elif operation == '6' or operation == 'update':
             update_data()
         elif operation == '7' or operation == 'search by price':
-            print(sort_by_price())
+            sort_by_price()
         elif operation == '8' or operation == 'search by status':
-            print(sort_by_status())
+            sort_by_status()
         elif operation == '9' or operation == 'purchase':
             purchase()
         elif operation ==  '10' or operation == 'exit':
